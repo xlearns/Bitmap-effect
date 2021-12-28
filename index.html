@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		*{
+			margin:0;
+			padding:0;
+		}
+		.testEcharts {
+			height: 100vh;
+			width: 100vw;
+			overflow: hidden;
+			background: url("image/bg.png") no-repeat center center/100%;
+		}
+		.testContainer {
+				position: absolute;
+				width: 100vw;
+				height: 100vh;
+				z-index: 2;
+		}
+
+.bubbleClass {
+			position: absolute !important;
+}
+
+#myCanvas {
+		position: absolute;
+		z-index: 1;
+		filter: blur(5px);
+	}
+
+@keyframes floating {
+		0% {
+			transform: translateY(0px);
+		}
+
+		50% {
+			transform: translateY(-5px);
+		}
+
+		100% {
+			transform: translateY(0px);
+		}
+	}
+	</style>
+</head>
+<body>
+	<div class="testEcharts dataCount">
+			<div class="testContainer"></div>
+			<canvas id="myCanvas"></canvas>
+	</div>
+	<script>
+		//
+		const width = document.body.offsetWidth
+		const height = document.body.offsetHeight
+
+		const collect = function (bubble, position) {
+			let { x, y } = position;
+			let bubbleSize = 10;
+			bubble.style.left = x + "px";
+			bubble.style.top = y + "px";
+			bubble.style.transition = `all 2s`;
+			bubble.style.width = bubble.style.height = `${bubbleSize}px`;
+		};
+
+		//
+		const drawDragonImageInCanvas = function () {
+			const c = document.querySelector("#myCanvas");
+			const ctx = c.getContext("2d");
+			const image = new Image();
+
+			image.src = './image/long.jpg';
+			image.onload = () => {
+				c.width = image.width;
+				c.height = image.height;
+				ctx.drawImage(image, 0, 0);
+				const imageData = ctx.getImageData(
+					0,
+					0,
+					image.width,
+					image.height
+				).data;
+				ctx.clearRect(0, 0, image.width, image.height);
+				const gap = 16;
+				let i = 0;
+				const dragonContainer = document.querySelector(".testContainer");
+				const dragonScale = 1;
+				for (let h = 0; h < image.height; h += gap) {
+					for (let w = 0; w < image.width; w += gap) {
+						const position = (image.width * h + w) * 4;
+						const r = imageData[position];
+						const g = imageData[position + 1];
+						const b = imageData[position + 2];
+						if (r + g + b < 100) {
+							const bubble = document.createElement("img");
+							bubble.src = './image/bubble.png';
+							bubble.setAttribute("index", ++i);
+							bubble.className = "bubbleClass";
+							const bubbleSize = 16;
+							bubble.style.position = "absolute";
+							bubble.style.left = `${w * dragonScale - bubbleSize / 2}px`;
+							bubble.style.top = `${h * dragonScale - bubbleSize / 2}px`;
+							bubble.style.width = bubble.style.height = `${bubbleSize}px`;
+							bubble.style.animationDuration = `${Math.random() * 6 + 4}s`;
+							dragonContainer.appendChild(bubble);
+						}
+					}
+				}
+			};
+		};
+		const $$ = function (el) {
+			return document.querySelectorAll(el);
+		};
+
+
+		const fn = function () {
+			const bubbles = $$(".bubbleClass");
+			bubbles.forEach((item, i) => {
+				if (i % 4 == 0) {
+					collect(item, { x: 600, y: (height - 16 - 88) / 2 });
+				} else if (i % 4 == 1) {
+					collect(item, { x: 1400, y: (height - 16 - 88) / 2 });
+				} else if (i % 4 == 2) {
+					collect(item, { x: 1200, y: (height - 16 - 88) / 2 });
+				} else {
+					collect(item, { x: 100, y: (height - 16 - 88) / 2 });
+				}
+			});
+		};
+		drawDragonImageInCanvas();
+		const c = document.querySelector(".testContainer");
+		c.addEventListener("click", fn);
+	</script>
+</body>
+</html>
